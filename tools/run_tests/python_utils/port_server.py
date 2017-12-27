@@ -75,6 +75,7 @@ def can_connect(port):
         s.connect(('localhost', port))
         return True
     except socket.error, e:
+        print("socket bind failed with %d" % port)
         return False
     finally:
         s.close()
@@ -87,6 +88,7 @@ def can_bind(port, proto):
         s.bind(('localhost', port))
         return True
     except socket.error, e:
+        print("socket bind failed with %s" % proto)
         return False
     finally:
         s.close()
@@ -107,6 +109,7 @@ def refill_pool(max_timeout, req):
                 continue
             req.log_message("kill old request %d" % i)
             del in_use[i]
+        req.log_message('attempting to bind port %d' % i)
         if can_bind(i, socket.AF_INET) and can_bind(
                 i, socket.AF_INET6) and not can_connect(i):
             req.log_message("found available port %d" % i)

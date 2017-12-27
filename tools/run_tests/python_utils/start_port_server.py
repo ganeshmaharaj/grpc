@@ -24,6 +24,7 @@ import time
 
 # must be synchronized with test/core/utils/port_server_client.h
 _PORT_SERVER_PORT = 32766
+proxies = {'http_proxy': os.environ.get('http_proxy'), 'https_proxy': os.environ.get('https_proxy'), 'no_proxy': os.environ.get('no_proxy')}
 
 
 def start_port_server():
@@ -34,7 +35,7 @@ def start_port_server():
     try:
         version = int(
             urllib.urlopen('http://localhost:%d/version_number' %
-                           _PORT_SERVER_PORT).read())
+                           _PORT_SERVER_PORT, proxies=proxies).read())
         logging.info('detected port server running version %d', version)
         running = True
     except Exception as e:
@@ -52,7 +53,7 @@ def start_port_server():
         if not running:
             logging.info('port_server version mismatch: killing the old one')
             urllib.urlopen(
-                'http://localhost:%d/quitquitquit' % _PORT_SERVER_PORT).read()
+                'http://localhost:%d/quitquitquit' % _PORT_SERVER_PORT, proxies=proxies).read()
             time.sleep(1)
     if not running:
         fd, logfile = tempfile.mkstemp()
@@ -93,7 +94,7 @@ def start_port_server():
                 time.sleep(1)
                 try:
                     urllib.urlopen(
-                        'http://localhost:%d/get' % _PORT_SERVER_PORT).read()
+                        'http://localhost:%d/get' % _PORT_SERVER_PORT, proxies=proxies).read()
                     logging.info(
                         'last ditch attempt to contact port server succeeded')
                     break
@@ -103,13 +104,16 @@ def start_port_server():
                     port_log = open(logfile, 'r').read()
                     print port_log
                     sys.exit(1)
+            logging.info("trying to reach the server")
+            logging.info('Using proxies %s' % proxies)
             try:
                 port_server_url = 'http://localhost:%d/get' % _PORT_SERVER_PORT
-                urllib.urlopen(port_server_url).read()
+                logging.info('starting the url open call using %s' % port_server_url)
+                urllib.urlopen(port_server_url, proxies=proxies).read()
                 logging.info('port server is up and ready')
                 break
             except socket.timeout:
-                logging.exception('while waiting for port_server')
+                logging.exception('while waiting for port_server socket error')
                 time.sleep(1)
                 waits += 1
             except IOError:
