@@ -85,7 +85,7 @@ def can_bind(port, proto):
     s = socket.socket(proto, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
-        s.bind(('localhost', port))
+        s.bind(('', port))
         return True
     except socket.error, e:
         print("socket bind failed with %s" % proto)

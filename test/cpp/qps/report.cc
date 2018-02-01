@@ -163,8 +163,8 @@ void GprLogReporter::ReportQueriesPerCpuSec(const ScenarioResult& result) {
 void JsonReporter::ReportQPS(const ScenarioResult& result) {
   grpc::string json_string =
       SerializeJson(result, "type.googleapis.com/grpc.testing.ScenarioResult");
-  std::ofstream output_file(report_file_);
-  output_file << json_string;
+  std::ofstream output_file(report_file_, std::ios_base::app);
+  output_file << json_string << "\n";
   output_file.close();
 }
 
